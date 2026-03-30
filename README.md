@@ -240,9 +240,9 @@ This project is developed for academic purposes under the MIT License.
 
 ## 👨‍💻 Developed By
 
-**[Your Name]**
+\*_Group name: _
 BS Information Technology
-[Your School Name]
-[Year]
+University of Cebu LApu-lapu Mandaue
+BSIT - 3H
 
 > _"Technology in service of transparency and accountability."_
