@@ -38,11 +38,30 @@ class DashboardController extends Controller
         $activeVisitors = Visitor::whereNull('time_out')->count();
         $totalVisitors = Visitor::count();
 
-        $recentVisitors = Visitor::with('loggedByUser')  // <-- changed from 'guard'
+        $recentVisitors = Visitor::with('loggedByUser')
             ->orderBy('time_in', 'desc')
             ->take(10)
             ->get();
 
-        return view('admin.dashboard', compact('todayVisitors', 'activeVisitors', 'totalVisitors', 'recentVisitors'));
+        // Last 7 days chart data
+        $chartData = collect(range(6, 0))->map(function ($daysAgo) {
+            $date = now()->subDays($daysAgo);
+            return [
+                'date' => $date->format('M d'),
+                'count' => Visitor::whereDate('time_in', $date->toDateString())->count(),
+            ];
+        });
+
+        $chartLabels = $chartData->pluck('date');
+        $chartCounts = $chartData->pluck('count');
+
+        return view('admin.dashboard', compact(
+            'todayVisitors',
+            'activeVisitors',
+            'totalVisitors',
+            'recentVisitors',
+            'chartLabels',
+            'chartCounts'
+        ));
     }
 }

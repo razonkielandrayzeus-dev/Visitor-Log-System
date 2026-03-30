@@ -7,6 +7,7 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
             <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
@@ -23,6 +24,12 @@
                 </div>
             </div>
 
+            <!-- Visitor Trend Chart -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6 p-6">
+                <h3 class="text-lg font-semibold mb-4">Visitor Trend (Last 7 Days)</h3>
+                <canvas id="visitorChart" height="100"></canvas>
+            </div>
+
             <!-- Recent Visitors -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
@@ -30,7 +37,7 @@
                         <h3 class="text-lg font-semibold">Recent Visitors</h3>
                         <a href="{{ route('visitors.index') }}" class="text-indigo-600 hover:text-indigo-900">View All</a>
                     </div>
-                    
+
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
@@ -63,6 +70,39 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('visitorChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {!! $chartLabels !!},
+                datasets: [{
+                    label: 'Visitors',
+                    data: {!! $chartCounts !!},
+                    backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                    borderColor: 'rgba(99, 102, 241, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+    </script>
 </x-app-layout>
