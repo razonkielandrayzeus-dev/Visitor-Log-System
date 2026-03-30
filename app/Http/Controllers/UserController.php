@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Models\ActivityLog;
 
 class UserController extends Controller
 {
@@ -35,6 +36,12 @@ class UserController extends Controller
             'role' => $validated['role'],
         ]);
 
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'USER_CREATED',
+            'description' => 'Created user account: ' . $validated['name'] . ' (' . $validated['role'] . ')',
+        ]);
+
         return redirect()->route('users.index')
             ->with('success', 'User created successfully!');
     }
@@ -51,6 +58,11 @@ class UserController extends Controller
         // Manually delete visitor records first using DB query
         \DB::table('visitors')->where('logged_by', $user->id)->delete();
 
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'USER_DELETED',
+            'description' => 'Deleted user account: ' . $user->name,
+        ]);
         // Now safe to delete the user
         $user->delete();
 

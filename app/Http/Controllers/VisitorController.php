@@ -6,6 +6,7 @@ use App\Models\Visitor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\DailyReportMail;
+use App\Models\ActivityLog;
 
 class VisitorController extends Controller
 {
@@ -30,6 +31,12 @@ class VisitorController extends Controller
             'logged_by' => auth()->id(),
         ]);
 
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'CHECK_IN',
+            'description' => 'Checked in visitor: ' . $validated['full_name'],
+        ]);
+
         return redirect()->route('guard.dashboard')
             ->with('success', 'Visitor checked in successfully!');
     }
@@ -41,6 +48,12 @@ class VisitorController extends Controller
         }
 
         $visitor->update(['time_out' => now()]);
+
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'CHECK_OUT',
+            'description' => 'Checked out visitor: ' . $visitor->full_name,
+        ]);
 
         return back()->with('success', 'Visitor checked out successfully!');
     }
