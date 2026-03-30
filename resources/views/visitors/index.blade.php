@@ -47,6 +47,7 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Out</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logged By</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -56,6 +57,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $visitor->purpose }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $visitor->host_name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $visitor->time_in->format('M d, Y h:i A') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $visitor->location ?? 'N/A' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-gray-500">
                                             {{ $visitor->time_out ? $visitor->time_out->format('h:i A') : '-' }}
                                         </td>

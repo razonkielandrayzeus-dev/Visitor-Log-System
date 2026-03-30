@@ -16,6 +16,8 @@ class Visitor extends Model
         'time_in',
         'time_out',
         'logged_by',
+        'ip_address',
+        'location',
     ];
 
     protected $casts = [

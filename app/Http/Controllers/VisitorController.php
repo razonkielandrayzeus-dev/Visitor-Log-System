@@ -19,22 +19,39 @@ class VisitorController extends Controller
     {
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
-            'purpose' => 'required|string|max:255',
+            'purpose'   => 'required|string|max:255',
             'host_name' => 'required|string|max:255',
         ]);
 
-        Visitor::create([
-            'full_name' => $validated['full_name'],
-            'purpose' => $validated['purpose'],
-            'host_name' => $validated['host_name'],
-            'time_in' => now(),
-            'logged_by' => auth()->id(),
+        // Get IP address
+        $ip = $request->ip();
+
+        // Call ipapi.co to get location
+        $location = 'Unknown';
+        try {
+            $response = file_get_contents("http://ipapi.co/{$ip}/json/");
+            $geo = json_decode($response, true);
+            if (isset($geo['city'], $geo['region'])) {
+                $location = $geo['city'] . ', ' . $geo['region'];
+            }
+        } catch (\Exception $e) {
+            $location = 'Unavailable';
+        }
+
+        $visitor = Visitor::create([
+            'full_name'  => $validated['full_name'],
+            'purpose'    => $validated['purpose'],
+            'host_name'  => $validated['host_name'],
+            'time_in'    => now(),
+            'logged_by'  => auth()->id(),
+            'ip_address' => $ip,
+            'location'   => $location,
         ]);
 
         ActivityLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'CHECK_IN',
-            'description' => 'Checked in visitor: ' . $validated['full_name'],
+            'user_id'     => auth()->id(),
+            'action'      => 'CHECK_IN',
+            'description' => 'Checked in visitor: ' . $validated['full_name'] . ' (from ' . $location . ')',
         ]);
 
         return redirect()->route('guard.dashboard')
