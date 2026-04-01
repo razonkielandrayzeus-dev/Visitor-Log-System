@@ -29,6 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/visitors/report', [VisitorController::class, 'report'])->name('visitors.report');
         Route::post('/visitors/send-report', [VisitorController::class, 'sendReport'])->name('visitors.send-report');
         Route::get('/activity-logs', [App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity.index');
+        Route::get('/reports/sent', [App\Http\Controllers\SentReportController::class, 'index'])->name('reports.sent');
 
         // User Management
         Route::get('/users', [UserController::class, 'index'])->name('users.index');

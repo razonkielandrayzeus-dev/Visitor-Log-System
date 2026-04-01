@@ -37,6 +37,9 @@
                         <x-nav-link :href="route('activity.index')" :active="request()->routeIs('activity.index')">
                             {{ __('Activity Log') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('reports.sent')" :active="request()->routeIs('reports.sent')">
+                            {{ __('Sent Reports') }}
+                        </x-nav-link>
                     @endif
                 </div>
             </div>

@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\DailyReportMail;
 use App\Models\ActivityLog;
+use App\Models\SentReport;
+
 
 class VisitorController extends Controller
 {
@@ -137,6 +139,18 @@ class VisitorController extends Controller
         try {
             Mail::to($request->email)->send(new DailyReportMail($data));
 
+            // Save to sent_reports table
+            SentReport::create([
+                'sent_by'          => auth()->id(),
+                'recipient_email'  => $request->email,
+                'report_date'      => $date,
+                'total_visitors'   => $data['totalVisitors'],
+                'completed_visits' => $data['completedVisits'],
+                'active_visitors'  => $data['activeVisitors'],
+                'status'           => 'sent',
+            ]);
+
+            // Save to activity log
             \App\Models\ActivityLog::create([
                 'user_id'     => auth()->id(),
                 'action'      => 'REPORT_SENT',
@@ -145,6 +159,18 @@ class VisitorController extends Controller
 
             return back()->with('success', '✅ Report sent successfully to ' . $request->email);
         } catch (\Exception $e) {
+
+            // Save failed attempt to database too
+            SentReport::create([
+                'sent_by'          => auth()->id(),
+                'recipient_email'  => $request->email,
+                'report_date'      => $date,
+                'total_visitors'   => $data['totalVisitors'],
+                'completed_visits' => $data['completedVisits'],
+                'active_visitors'  => $data['activeVisitors'],
+                'status'           => 'failed',
+            ]);
+
             return back()->with('error', '❌ Failed to send: ' . $e->getMessage());
         }
     }
