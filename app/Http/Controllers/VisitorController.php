@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Visitor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 use App\Mail\DailyReportMail;
 use App\Models\ActivityLog;
 use App\Models\SentReport;
@@ -66,15 +67,22 @@ class VisitorController extends Controller
             return back()->with('error', 'Visitor already checked out.');
         }
 
-        $visitor->update(['time_out' => now()]);
+        // Use raw query with explicit timestamp to avoid any Eloquent recasting
+        DB::statement(
+            'UPDATE visitors SET time_out = ? WHERE id = ?',
+            [now()->toDateTimeString(), $visitor->id]
+        );
+
+        // Refresh visitor from DB to get updated data
+        $visitor->refresh();
 
         ActivityLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'CHECK_OUT',
+            'user_id'     => auth()->id(),
+            'action'      => 'CHECK_OUT',
             'description' => 'Checked out visitor: ' . $visitor->full_name,
         ]);
 
-        return back()->with('success', 'Visitor checked out successfully!');
+        return back()->with('success', 'Visitor "' . $visitor->full_name . '" checked out successfully!');
     }
 
     public function index(Request $request)
@@ -96,6 +104,28 @@ class VisitorController extends Controller
         $visitors = $query->orderBy('time_in', 'desc')->paginate(20);
 
         return view('visitors.index', compact('visitors'));
+    }
+
+    public function guardVisitors(Request $request)
+    {
+        $query = Visitor::with('loggedByUser')
+            ->where('logged_by', auth()->id()); // only show visitors logged by this guard
+
+        if ($request->filled('search')) {
+            $query->where('full_name', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('date')) {
+            $query->whereDate('time_in', $request->date);
+        }
+
+        if ($request->filled('purpose')) {
+            $query->where('purpose', 'like', '%' . $request->purpose . '%');
+        }
+
+        $visitors = $query->orderBy('time_in', 'desc')->paginate(20);
+
+        return view('guard.visitors', compact('visitors'));
     }
 
     public function report(Request $request)

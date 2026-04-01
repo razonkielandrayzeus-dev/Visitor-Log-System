@@ -19,6 +19,9 @@
                         <x-nav-link :href="route('visitors.create')" :active="request()->routeIs('visitors.create')">
                             {{ __('Log Visitor') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('guard.visitors')" :active="request()->routeIs('guard.visitors')">
+                            {{ __('My Visitors') }}
+                        </x-nav-link>
                     @endif
 
                     @if(auth()->user()->isAdmin())

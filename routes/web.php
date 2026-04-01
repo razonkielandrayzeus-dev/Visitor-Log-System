@@ -20,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/visitors/create', [VisitorController::class, 'create'])->name('visitors.create');
         Route::post('/visitors', [VisitorController::class, 'store'])->name('visitors.store');
         Route::post('/visitors/{visitor}/checkout', [VisitorController::class, 'checkout'])->name('visitors.checkout');
+        Route::get('/guard/visitors', [VisitorController::class, 'guardVisitors'])->name('guard.visitors');
     });
 
     // Admin Routes

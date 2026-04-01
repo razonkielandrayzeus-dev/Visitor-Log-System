@@ -9,6 +9,9 @@ class Visitor extends Model
 {
     use HasFactory;
 
+    // Disable auto timestamp updates
+    const UPDATED_AT = null;
+
     protected $fillable = [
         'full_name',
         'purpose',
