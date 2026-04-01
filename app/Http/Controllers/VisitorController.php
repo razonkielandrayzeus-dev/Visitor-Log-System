@@ -115,27 +115,37 @@ class VisitorController extends Controller
     public function sendReport(Request $request)
     {
         $request->validate([
-            'date' => 'required|date',
+            'date'  => 'required|date',
             'email' => 'required|email',
         ]);
 
         $date = $request->input('date');
 
         $visitors = Visitor::whereDate('time_in', $date)
-            ->with('loggedByUser') // <-- fixed
+            ->with('loggedByUser')
             ->orderBy('time_in', 'desc')
             ->get();
 
         $data = [
-            'date' => $date,
-            'totalVisitors' => $visitors->count(),
-            'activeVisitors' => $visitors->whereNull('time_out')->count(),
+            'date'            => $date,
+            'totalVisitors'   => $visitors->count(),
+            'activeVisitors'  => $visitors->whereNull('time_out')->count(),
             'completedVisits' => $visitors->whereNotNull('time_out')->count(),
-            'visitors' => $visitors,
+            'visitors'        => $visitors,
         ];
 
-        Mail::to($request->email)->send(new DailyReportMail($data));
+        try {
+            Mail::to($request->email)->send(new DailyReportMail($data));
 
-        return back()->with('success', 'Report sent successfully to ' . $request->email);
+            \App\Models\ActivityLog::create([
+                'user_id'     => auth()->id(),
+                'action'      => 'REPORT_SENT',
+                'description' => 'Sent daily report for ' . $date . ' to ' . $request->email,
+            ]);
+
+            return back()->with('success', '✅ Report sent successfully to ' . $request->email);
+        } catch (\Exception $e) {
+            return back()->with('error', '❌ Failed to send: ' . $e->getMessage());
+        }
     }
 }

@@ -1,75 +1,103 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <title>Daily Visitor Report</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: #4f46e5; color: white; padding: 20px; text-align: center; }
-        .stats { display: flex; justify-content: space-around; margin: 20px 0; }
-        .stat-box { text-align: center; padding: 15px; background: #f3f4f6; border-radius: 8px; }
-        .stat-number { font-size: 24px; font-weight: bold; color: #4f46e5; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #f3f4f6; font-weight: bold; }
-        .status-active { color: #059669; }
-        .status-completed { color: #6b7280; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#f4f4f2; }
+        .wrapper { max-width:640px; margin:40px auto; background:#fff; border-radius:12px; overflow:hidden; border:1px solid #e2e1dc; }
+        .header { background:#1c1c1a; padding:32px 40px; }
+        .header h1 { color:#f4f4f2; font-size:20px; font-weight:600; }
+        .header p { color:#9c9b96; font-size:13px; margin-top:4px; }
+        .stats { display:flex; border-bottom:1px solid #e2e1dc; }
+        .stat { flex:1; padding:24px; text-align:center; border-right:1px solid #e2e1dc; }
+        .stat:last-child { border-right:none; }
+        .stat-num { font-size:32px; font-weight:600; color:#1c1c1a; font-family:monospace; }
+        .stat-label { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:#9c9b96; margin-top:4px; }
+        .section { padding:28px 40px; }
+        .section-title { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:#9c9b96; margin-bottom:16px; font-weight:500; }
+        table { width:100%; border-collapse:collapse; font-size:13px; }
+        thead th { text-align:left; padding:8px 12px; background:#f4f4f2; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:#9c9b96; font-weight:500; }
+        tbody td { padding:10px 12px; border-bottom:1px solid #f0efe9; color:#3d3d3a; }
+        tbody tr:last-child td { border-bottom:none; }
+        .badge-active { display:inline-block; background:#dcfce7; color:#166534; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:500; }
+        .badge-done { display:inline-block; background:#f1f0eb; color:#6b6b65; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:500; }
+        .footer { padding:20px 40px; background:#f4f4f2; border-top:1px solid #e2e1dc; }
+        .footer p { font-size:11px; color:#b0afa9; text-align:center; line-height:1.8; }
+        .empty { text-align:center; padding:40px; color:#b0afa9; font-size:14px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Daily Visitor Report</h1>
-            <p>{{ \Carbon\Carbon::parse($data['date'])->format('F d, Y') }}</p>
-        </div>
+<div class="wrapper">
 
-        <div class="stats">
-            <div class="stat-box">
-                <div class="stat-number">{{ $data['totalVisitors'] }}</div>
-                <div>Total Visitors</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-number">{{ $data['activeVisitors'] }}</div>
-                <div>Active</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-number">{{ $data['completedVisits'] }}</div>
-                <div>Completed</div>
-            </div>
-        </div>
+    <div class="header">
+        <h1>Daily Visitor Report</h1>
+        <p>{{ \Carbon\Carbon::parse($data['date'])->format('l, F d, Y') }}</p>
+    </div>
 
-        <h2>Visitor Details</h2>
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-num">{{ $data['totalVisitors'] }}</div>
+            <div class="stat-label">Total visitors</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">{{ $data['completedVisits'] }}</div>
+            <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">{{ $data['activeVisitors'] }}</div>
+            <div class="stat-label">Still inside</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Visitor details</div>
+
+        @if($data['visitors']->count() > 0)
         <table>
             <thead>
                 <tr>
                     <th>Name</th>
                     <th>Purpose</th>
                     <th>Host</th>
-                    <th>Time In</th>
-                    <th>Time Out</th>
+                    <th>Time in</th>
+                    <th>Time out</th>
                     <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($data['visitors'] as $visitor)
                 <tr>
-                    <td>{{ $visitor->full_name }}</td>
+                    <td><strong>{{ $visitor->full_name }}</strong></td>
                     <td>{{ $visitor->purpose }}</td>
                     <td>{{ $visitor->host_name }}</td>
                     <td>{{ $visitor->time_in->format('h:i A') }}</td>
-                    <td>{{ $visitor->time_out ? $visitor->time_out->format('h:i A') : '-' }}</td>
-                    <td class="{{ $visitor->isActive() ? 'status-active' : 'status-completed' }}">
-                        {{ $visitor->isActive() ? 'Active' : 'Completed' }}
+                    <td>{{ $visitor->time_out ? $visitor->time_out->format('h:i A') : '—' }}</td>
+                    <td>
+                        @if($visitor->isActive())
+                            <span class="badge-active">Active</span>
+                        @else
+                            <span class="badge-done">Done</span>
+                        @endif
                     </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
+        @else
+            <div class="empty">No visitors recorded for this date.</div>
+        @endif
+    </div>
 
-        <p style="margin-top: 30px; color: #6b7280; font-size: 12px; text-align: center;">
+    <div class="footer">
+        <p>
             Generated by Visitor Log Monitoring System<br>
-            Supporting SDG 16: Peace, Justice, and Strong Institutions
+            Supporting SDG 16: Peace, Justice, and Strong Institutions<br>
+            {{ now()->format('F d, Y \a\t h:i A') }}
         </p>
     </div>
+
+</div>
 </body>
 </html>

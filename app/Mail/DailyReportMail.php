@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -13,9 +12,9 @@ class DailyReportMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $data;
+    public array $data;
 
-    public function __construct($data)
+    public function __construct(array $data)
     {
         $this->data = $data;
     }
@@ -23,7 +22,7 @@ class DailyReportMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Daily Visitor Report - ' . $this->data['date'],
+            subject: 'Daily Visitor Report — ' . $this->data['date'],
         );
     }
 
@@ -31,6 +30,7 @@ class DailyReportMail extends Mailable
     {
         return new Content(
             view: 'emails.daily-report',
+            with: ['data' => $this->data],
         );
     }
 
