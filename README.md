@@ -159,6 +159,12 @@ To create your own accounts after seeding, log in as Admin and go to **Users →
 
 ## 🖼️ Screenshots
 
+### Diagrams
+
+![ERD](docs/erd.png)
+![Use Case](docs/use-case.png)
+![System Flow](docs/system-flow.png)
+
 ### Login Page
 
 ![Login](docs/screenshots/login.png)
