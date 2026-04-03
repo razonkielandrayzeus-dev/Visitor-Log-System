@@ -9,9 +9,6 @@ class Visitor extends Model
 {
     use HasFactory;
 
-    // Disable auto timestamp updates
-    const UPDATED_AT = null;
-
     protected $fillable = [
         'full_name',
         'purpose',
@@ -24,11 +21,13 @@ class Visitor extends Model
     ];
 
     protected $casts = [
-        'time_in' => 'datetime',
+        'time_in'  => 'datetime',
         'time_out' => 'datetime',
     ];
 
-    // Renamed from guard() to loggedByUser() to avoid conflict with Model::guard()
+    // Prevent Eloquent from auto-modifying time_in on updates
+    protected $guarded = [];
+
     public function loggedByUser()
     {
         return $this->belongsTo(User::class, 'logged_by');
@@ -44,6 +43,17 @@ class Visitor extends Model
         if (!$this->time_out) {
             return null;
         }
-        return $this->time_in->diffForHumans($this->time_out, true);
+
+        $diffInMinutes = $this->time_in->diffInMinutes($this->time_out);
+
+        if ($diffInMinutes < 1) {
+            return $this->time_in->diffInSeconds($this->time_out) . ' seconds';
+        } elseif ($diffInMinutes < 60) {
+            return $diffInMinutes . ' min';
+        } else {
+            $hours   = floor($diffInMinutes / 60);
+            $minutes = $diffInMinutes % 60;
+            return $hours . 'h ' . ($minutes > 0 ? $minutes . 'm' : '');
+        }
     }
 }

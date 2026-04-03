@@ -41,14 +41,16 @@ class VisitorController extends Controller
             $location = 'Unavailable';
         }
 
-        $visitor = Visitor::create([
+        DB::table('visitors')->insert([
             'full_name'  => $validated['full_name'],
             'purpose'    => $validated['purpose'],
             'host_name'  => $validated['host_name'],
-            'time_in'    => now(),
+            'time_in'    => now()->toDateTimeString(),
             'logged_by'  => auth()->id(),
             'ip_address' => $ip,
             'location'   => $location,
+            'created_at' => now()->toDateTimeString(),
+            'updated_at' => now()->toDateTimeString(),
         ]);
 
         ActivityLog::create([
@@ -67,14 +69,18 @@ class VisitorController extends Controller
             return back()->with('error', 'Visitor already checked out.');
         }
 
-        // Use raw query with explicit timestamp to avoid any Eloquent recasting
-        DB::statement(
-            'UPDATE visitors SET time_out = ? WHERE id = ?',
-            [now()->toDateTimeString(), $visitor->id]
-        );
+        // Save original time_in before anything touches it
+        $originalTimeIn = $visitor->getRawOriginal('time_in');
 
-        // Refresh visitor from DB to get updated data
-        $visitor->refresh();
+        DB::statement(
+            'UPDATE visitors SET time_out = ?, time_in = ?, updated_at = ? WHERE id = ?',
+            [
+                now()->toDateTimeString(),
+                $originalTimeIn,
+                now()->toDateTimeString(),
+                $visitor->id
+            ]
+        );
 
         ActivityLog::create([
             'user_id'     => auth()->id(),
