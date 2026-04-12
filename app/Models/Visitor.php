@@ -47,7 +47,7 @@ class Visitor extends Model
         $diffInMinutes = $this->time_in->diffInMinutes($this->time_out);
 
         if ($diffInMinutes < 1) {
-            return $this->time_in->diffInSeconds($this->time_out) . ' seconds';
+            return number_format($this->time_in->floatDiffInSeconds($this->time_out), 2) . ' seconds';
         } elseif ($diffInMinutes < 60) {
             return $diffInMinutes . ' min';
         } else {

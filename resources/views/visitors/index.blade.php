@@ -57,7 +57,6 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $visitor->purpose }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $visitor->host_name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $visitor->time_in->format('M d, Y h:i A') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $visitor->location ?? 'N/A' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-gray-500">
                                             {{ $visitor->time_out ? $visitor->time_out->format('h:i A') : '-' }}
                                         </td>
@@ -69,6 +68,7 @@
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Completed</span>
                                             @endif
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $visitor->location ?? 'N/A' }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

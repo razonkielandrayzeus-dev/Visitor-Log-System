@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\DB;
 use App\Mail\DailyReportMail;
 use App\Models\ActivityLog;
 use App\Models\SentReport;
-
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class VisitorController extends Controller
 {
@@ -31,14 +32,27 @@ class VisitorController extends Controller
 
         // Call ipapi.co to get location
         $location = 'Unknown';
-        try {
-            $response = file_get_contents("http://ipapi.co/{$ip}/json/");
-            $geo = json_decode($response, true);
-            if (isset($geo['city'], $geo['region'])) {
-                $location = $geo['city'] . ', ' . $geo['region'];
+        if (in_array($ip, ['127.0.0.1', '::1'])) {
+            $location = 'Local Network';
+        } else {
+            try {
+                $response = Http::timeout(3)->get("https://ipapi.co/{$ip}/json/");
+                
+                if ($response->successful()) {
+                    $geo = $response->json();
+                    if (isset($geo['city'], $geo['region'])) {
+                        $location = $geo['city'] . ', ' . $geo['region'];
+                    } elseif (isset($geo['error'])) {
+                        Log::warning("Geolocation API error for IP {$ip}: " . ($geo['reason'] ?? 'Unknown reason'));
+                        $location = 'Unavailable';
+                    }
+                } else {
+                    Log::warning("Geolocation API returned status {$response->status()} for IP {$ip}");
+                }
+            } catch (\Exception $e) {
+                Log::error("Geolocation API request failed: " . $e->getMessage());
+                $location = 'Unavailable';
             }
-        } catch (\Exception $e) {
-            $location = 'Unavailable';
         }
 
         DB::table('visitors')->insert([
